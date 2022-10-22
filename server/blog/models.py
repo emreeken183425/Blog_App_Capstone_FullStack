@@ -32,6 +32,9 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=OPTIONS, default='d')
 
+    def __str__(self):
+        return f"{self.title}-{self.author} "
+
      # @property
     # def quiz_count(self):
     #     return self.quizz.count()  # related name varsa
