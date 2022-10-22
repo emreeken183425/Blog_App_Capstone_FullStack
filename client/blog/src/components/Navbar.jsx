@@ -30,6 +30,8 @@ export default function Navbar() {
     }else if (e.target.innerText === 'Logout'){
       logout(navigate)
       navigate("/login")
+    }else if(e.target.innerText==='NewPost'){
+      navigate("/newpost")
     }
 
   };
@@ -83,6 +85,8 @@ export default function Navbar() {
                 onClose={handleClose}
               >
                 <MenuItem onClick={(e)=>handleClose(e)}>Logout</MenuItem>
+                <MenuItem onClick={(e)=>handleClose(e)}>NewPost</MenuItem>
+
                 
               </Menu>):(<Menu
                 id="menu-appbar"
