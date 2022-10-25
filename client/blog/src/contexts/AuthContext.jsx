@@ -1,99 +1,103 @@
 import axios from "axios"
-import { createContext } from "react"
-import { useState } from "react";
-import {toastSuccessNotify} from '../helper/ToastNotify'
+import { createContext, useState } from "react"
+import React from 'react'
+import { toastSuccessNotify } from "../helper/ToastNotify"
+
 
 //! Defining
-
 export const AuthContext = createContext()
 
 
 
 //! Provider
+
 const AuthContextProvider = (props) => {
-const url ="http://127.0.0.1:8000/"
 
-const [currentUser,setCurrentUser] =useState(sessionStorage.getItem("username")||false)
-let keys=sessionStorage.getItem("Token")
-const [key,setKey] =useState(keys && window.atob(keys) )
+    const url = "http://127.0.0.1:8000/"
 
-//?************************REGİSTER*********************
+    const [currentUser, setCurrentUser] = useState(sessionStorage.getItem("username") || false)
 
-const createUser =async(email,password,firstName,lastName,userName,navigate) =>{
-    const response = await axios.post(`${url}users/register/`,{
-            "username": userName,
-            "first_name": firstName,
-            "last_name": lastName,
-            "email": email,
-            "password": password,
-            "password1": password,
+    const [key, setKey] = useState(sessionStorage.getItem("token") || "")
+
+// ************************** REGISTER *********************
+
+const createUser = async(email, password, firstName, lastName, userName, navigate) => {
+    const response = await axios.post(`${url}users/register/`, {
+
+        "username":userName,
+        "first_name":firstName,
+        "last_name":lastName,
+        "email":email,
+        "password":password,
+        "password1":password,
     })
+    console.log(response)
     if(response.data.token){
-      setCurrentUser(response.data.username )
-      sessionStorage.setItem("username",response.data.username)
-      setKey(response.data.token)
-      toastSuccessNotify("user register successfully")
-      navigate("/")
+        setCurrentUser(response.data.username)
+        sessionStorage.setItem("username", response.data.username)
+        // setKey(response.data.token)
+        sessionStorage.setItem("token", response.data.token)
+        toastSuccessNotify("User registered success")
+        navigate("/")
     }
-   console.log(response);
 }
 
-//?************************LOGİN*********************
+// ************************** LOGIN *********************
 
-const signIn=async(email,password,username,navigate)=>{
-  try {
-    const res=await axios.post(`${url}users/auth/login/ `,{
-      
-        "username": username,
-        "email": email,
-        "password": password
-    
-    } )
-    if(res.data.key){
-      setCurrentUser(res.data.username)
-      sessionStorage.setItem("username",res.data.user.username )
-      setKey(res.data.key)
-      const myKey=window.btoa(res.data.key)
-      sessionStorage.setItem("Token",myKey)
-      toastSuccessNotify("user login successfully")
-      navigate("/")
+const signIn = async(email,password, userName,navigate) => {
+
+    try {
+        const res = await axios.post(`${url}users/auth/login/`,{
+            "username":userName,
+            "email":email,
+            "password":password,
+        })
+        console.log(res)
+        
+        if(res.data.key){
+            setCurrentUser(res.data.user.username)
+            sessionStorage.setItem("username", res.data.user.username)
+            setKey(res.data.key)
+            const myKey = window.btoa(res.data.key)
+            sessionStorage.setItem("token", myKey)
+            toastSuccessNotify("Login success")
+            navigate("/")
+        }
+
+    } catch (error) {
+        console.log(error)
     }
-  
-
-  } catch (err) {
-    console.log(err);
-  }
 }
-//?************************LOGOUT*********************
 
 const logout =async(navigate) =>{
-  try{
-   
-   const res = await axios.post(`${url}users/auth/logout/`)
-   console.log(res)
-   if(res.status===200){
-    setCurrentUser(false)
-    setKey(false)
-    sessionStorage.clear()
-    toastSuccessNotify("User logout succesfully")
-    navigate("/login")
-   }
+    try{
+     
+     const res = await axios.post(`${url}users/auth/logout/`)
+     console.log(res)
+     if(res.status===200){
+      setCurrentUser(false)
+      setKey(false)
+      sessionStorage.clear()
+      toastSuccessNotify("User logout succesfully")
+      navigate("/login")
+     }
+    }
+    catch(err){
+      console.log(err)
+    }
   }
-  catch(err){
-    console.log(err)
-  }
-}
-
-let values ={
+let values = {
     createUser,
     currentUser,
+    key,
     signIn,
     logout,
-    key
 }
 
   return (
-    <AuthContext.Provider value={values} >{props.children}</AuthContext.Provider>
+    <AuthContext.Provider value = {values}>
+        {props.children}
+    </AuthContext.Provider>
   )
 }
 
