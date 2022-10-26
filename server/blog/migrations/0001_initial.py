@@ -28,9 +28,7 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=100)),
             ],
-            options={
-                "verbose_name_plural": "Categories",
-            },
+            options={"verbose_name_plural": "Categories",},
         ),
         migrations.CreateModel(
             name="Post",
@@ -75,6 +73,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
+                        related_name="categorys",
                         to="blog.category",
                     ),
                 ),
@@ -110,9 +109,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "abstract": False,
-            },
+            options={"abstract": False,},
         ),
         migrations.CreateModel(
             name="Like",
@@ -176,8 +173,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "abstract": False,
-            },
+            options={"abstract": False,},
         ),
     ]

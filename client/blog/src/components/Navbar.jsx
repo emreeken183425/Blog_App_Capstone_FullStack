@@ -9,10 +9,22 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import { useMediaQuery,  useTheme,} from "@mui/material"
+import foto from "../images/foto.png"
+import Avatar from '@mui/material/Avatar';
 
-export default function Navbar() {
- const {currentUser,logout} = React.useContext(AuthContext);
-//  const currentUser=false
+
+
+
+
+export default function NavBar() {
+  const {currentUser,logOut} = React.useContext(AuthContext);
+
+  const theme = useTheme();
+  //const isMatch = useMediaQuery(theme.breakpoints.down("md"));
+
+  
+ 
     
   const navigate = useNavigate()
   // const [auth, setAuth] = React.useState(true);
@@ -28,21 +40,25 @@ export default function Navbar() {
     }else if (e.target.innerText === 'Sign Up') {
       navigate('/register')
     }else if (e.target.innerText === 'Logout'){
-      logout(navigate)
-      navigate("/login")
-    }else if(e.target.innerText==='NewPost'){
+      logOut(navigate)
+    
+    }else if(e.target.innerText==="NewPost"){
       navigate("/newpost")
     }
 
   };
+
 
   return (
     <Box sx={{marginBottom:"0px"}} >
      
       <AppBar position="static" style={{cursor:"pointer"}} sx={{backgroundColor:"tomato"}}>
         <Toolbar>
+        <Avatar alt="Blog Admin" src={foto} sx={{ width: 45, height: 45,mr:2}}/>
+       
+       
             <Typography variant="h6" color="inherit" sx={{ flexGrow: 3,textAlign:"left"}} style={{marginLeft:"0px"}} onClick={()=>navigate("/")} >
-              Blog app
+             Blog App Project
             </Typography>
             {currentUser ? (
             <Typography variant="h6" component="div" sx={{ flexGrow: 1,textAlign:"end",paddingRight:"1rem"}} > 
@@ -86,7 +102,6 @@ export default function Navbar() {
               >
                 <MenuItem onClick={(e)=>handleClose(e)}>Logout</MenuItem>
                 <MenuItem onClick={(e)=>handleClose(e)}>NewPost</MenuItem>
-
                 
               </Menu>):(<Menu
                 id="menu-appbar"
@@ -115,3 +130,4 @@ export default function Navbar() {
     </Box>
   );
 }
+

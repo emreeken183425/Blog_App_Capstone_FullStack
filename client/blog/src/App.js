@@ -1,19 +1,17 @@
-import "./App.css";
-import AuthContextPovider from "./contexts/AuthContext";
-import AppRouter from "./router/AppRouter";
-import {ToastContainer } from 'react-toastify'
+import './App.css';
+import AuthContextProvider from './contexts/AuthContext';
+import AppRouter from "./router/AppRouter"
+import { ToastContainer} from 'react-toastify';
+
+
 
 function App() {
   return (
-    <>
-    <AuthContextPovider>
-       <AppRouter />
-       <ToastContainer />
-    </AuthContextPovider>
-      
+    <AuthContextProvider>
+      <AppRouter/>
+      <ToastContainer/>
 
-     
-    </>
+    </AuthContextProvider>
   );
 }
 

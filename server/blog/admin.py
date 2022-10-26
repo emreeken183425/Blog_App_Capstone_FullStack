@@ -4,11 +4,13 @@ from .models import (
     Post,
     Comment,
     Like,
-    PostView,
+    PostView
 )
+
 admin.site.register(Category)
 admin.site.register(Post)
 admin.site.register(Comment)
 admin.site.register(Like)
 admin.site.register(PostView)
 
+# Register your models here.

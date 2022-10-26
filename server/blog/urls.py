@@ -1,8 +1,11 @@
-from django.contrib import admin
-from django.urls import path
+
+
+from django.urls import path,include
 from .views import (
-    CategoryViews
-    )
+    CategoryViews,
+)
+
 urlpatterns = [
-  path("/category",CategoryViews.as_view() )
+    path("category/",CategoryViews.as_view()),
+  
 ]
