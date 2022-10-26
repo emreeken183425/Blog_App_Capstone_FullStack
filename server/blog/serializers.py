@@ -9,7 +9,6 @@ from .models import (
 )
 
 
-
 class CategorySerializers(serializers.ModelSerializer):
     class Meta:
         model=Category
