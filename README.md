@@ -1,7 +1,4 @@
-
-<!-- Frontend && Backend  capstone blog app project  -->
-### CharField 255 karaktere kadar stringler için kullanılan alan tipidir. max_length argümanı tanımlanması zorunludur. max_length argümanı alanın alabileceği maksimum karakter sayısını belirler. Ürünümüz için isim alanı ekleylim. En fazla 200 karakter alabilsin.
-
+#### CharField 255 karaktere kadar stringler için kullanılan alan tipidir. max_length argümanı tanımlanması zorunludur. max_length argümanı alanın alabileceği maksimum karakter sayısını belirler. Ürünümüz için isim alanı ekleylim. En fazla 200 karakter alabilsin.
 <hr>
  <div style="color: red;">1. verbose_name :</div> alanın admin sayfasıi form gibi çıktılarda görüntülecek adıdır. Eğer girilmezse değişken kullanılır.
 <hr>
@@ -13,7 +10,7 @@
 <hr>
 <div style="color: red;">5. unique: </div> argümanı eğer True ise alanın benzersiz olduğunu belirtir. O alan aynı değeri sadece bir kez alabilir.
 <hr>
-<div style="color: red;">6. editable: </div> argümanı eğer False seçilirse ilgili alan admin paneli ve formlarda görüntülenmez. Varsayılan değeri True'dur.
+<div style="color: red;">6. editable: </div> argümanı eğer False seçilirse ilgili alan admin paneli ve formlarda görüntülenmez. Varsayılan değeri True’dur.
 <hr>
 <div style="color: red;">7. db_index: </div> argümanı index oluşturulması istenilen alanlar için True seçilir.
 <hr>
@@ -122,7 +119,7 @@ pip install djangorestframework
 
 ## PostgreSQL Setup
 
- To get Python working with Postgres, you will need to install the "psycopg2" module👇
+ To get Python working with Postgres, you will need to install the “psycopg2” module👇
 
 ```bash
 pip install psycopg2
@@ -219,7 +216,7 @@ python manage.py migrate --run-syncdb
 
 ## INSTALL DEBUG TOOLBAR 👇
 
-🔹 The Django Debug Toolbar is a configurable set of panels that display various debug information about the current request/response and when clicked, display more details about the panel's content.
+🔹 The Django Debug Toolbar is a configurable set of panels that display various debug information about the current request/response and when clicked, display more details about the panel’s content.
 
 📜 See the Django Debug Toolbar [documentation page](https://django-debug-toolbar.readthedocs.io/en/latest/).
 
@@ -237,7 +234,7 @@ pip freeze > requirements.txt
 
 ✔ Go to "settings.py" and add 'debug_toolbar' app to INSTALLED_APPS
 
-## Add django-debug-toolbar's URLs to your project's URLconf 👇
+## Add django-debug-toolbar’s URLs to your project’s URLconf 👇
 
 ```python
 from django.urls import include
@@ -474,13 +471,14 @@ class CustomTokenSerializer(TokenSerializer):
             'user'
         )
 ```
+
 ##  [SIGNALS](https://docs.djangoproject.com/en/4.1/topics/signals/) 👇
 
-🔹 Django include  a "signal dispatcher" which helps decoupled applications get notified when actions occur elsewhere in the framework.
+🔹 Django include  a “signal dispatcher” which helps decoupled applications get notified when actions occur elsewhere in the framework.
 
 🔹 In   nutshell, signals allow certain senders to notify a set of receivers that some action has taken place.
 
-🔹 They're especially useful when many pieces of code may be interested in the same events.
+🔹 They’re especially useful when many pieces of code may be interested in the same events.
 
 ##  Listening to signals 👉 Parameters:
 
@@ -488,7 +486,7 @@ class CustomTokenSerializer(TokenSerializer):
 
 🔹 <b>sender</b>: Specifies a particular sender to receive signals from. See Connecting to signals sent by specific senders for more information.
 
-🔹 <b>weak</b>: Django stores signal handlers as weak references by default. Thus, if your receiver is a local function, it may be garbage collected. To prevent this, pass weak=False when you call the signal's connect() method.
+🔹 <b>weak</b>: Django stores signal handlers as weak references by default. Thus, if your receiver is a local function, it may be garbage collected. To prevent this, pass weak=False when you call the signal’s connect() method.
 
 🔹 <b>dispatch_uid</b>: A unique identifier for a signal receiver in cases where duplicate signals may be sent. See Preventing duplicate signals for more information.
 
@@ -663,10 +661,527 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 ## Go to user/api/views.py and add "UpdateUserView" 👇
 
-
 ```python
 class UpdateUserView(generics.RetrieveUpdateAPIView):
     #! We used RetrieveUpdateAPIView so that the user can only update. 👆
     queryset = User.objects.all()
     serializer_class = UpdateUserSerializer
 ```
+
+## 👇 Go to "user/api/urls.py" and add the path 👇
+
+```python
+path('update-profile/<int:pk>', UpdateUserView.as_view()),
+```
+
+## ✏ Create "api" folder under "blog" app and add the "views, serializers, urls" files.
+
+## Create models in "models.py" under "blog" app 👇
+
+```python
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.db import models
+from django.conf import settings
+from django.template.defaultfilters import slugify
+from blog.api.utils import get_random_code
+
+User = settings.AUTH_USER_MODEL
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+class BlogPost(models.Model):
+    STATUS = (
+        ("d", "DRAFT"),
+        ("p", "PUBLISHED"),
+    )
+    title = models.CharField(max_length=100)
+    author = models.ForeignKey(
+        User, related_name="post_user", on_delete=models.PROTECT, default='Anonymous User')
+    category = models.ForeignKey(
+        Category, related_name="post_category", on_delete=models.CASCADE)
+    content = models.TextField()
+    # image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=None)
+    image = models.URLField(max_length=200, blank=True,
+                            default="https://gravatar.com/avatar/2074b7945e3c6c493b0b2b94b24c35c2?s=400&d=robohash&r=x")
+    published_date = models.DateTimeField(auto_now_add=True, blank=True)
+    last_updated_date = models.DateTimeField(auto_now=True, blank=True)
+    status = models.CharField(max_length=2, choices=STATUS)
+    slug = models.SlugField(blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+class Like(models.Model):
+    user = models.ForeignKey(
+        User, related_name="like_user", on_delete=models.PROTECT)
+    post = models.ForeignKey(
+        BlogPost, related_name="like_post", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user
+
+class Comment(models.Model):
+    content = models.TextField()
+    time_stamp = models.DateTimeField(auto_now_add=True, blank=True)
+    user = models.ForeignKey(User, related_name="comment_user",
+                             on_delete=models.PROTECT, default='Anonymous User')
+    post = models.ForeignKey(
+        BlogPost, related_name="comment_post", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user
+
+class Post_view(models.Model):
+    user = models.ForeignKey(
+        User, related_name="post_viewed_user", on_delete=models.PROTECT)
+    post = models.ForeignKey(
+        BlogPost, related_name="viewed_post", on_delete=models.CASCADE)
+    viewed_date_time = models.DateTimeField(auto_now_add=True, blank=True)
+```
+
+## Register the models in "admin.py" 👇
+
+```python
+from django.contrib import admin
+
+from blog.models import BlogPost, Category, Comment, Like, Post_view
+
+admin.site.register(Category)
+admin.site.register(Like)
+admin.site.register(BlogPost)
+admin.site.register(Comment)
+admin.site.register(Post_view)
+```
+
+## Create "signals.py" file under "blog/api" folder and add 👇
+
+```python
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.template.defaultfilters import slugify
+from blog.models import BlogPost
+from .utils import get_random_code
+
+@receiver(pre_save, sender=BlogPost)
+def pre_save_create_slug(sender, instance,**kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.title + " " + get_random_code())
+```
+
+## Create "utils.py" file under "blog/api" folder and add 👇
+
+```python
+import uuid
+#! 👆 user uniqe id => Slug field must be uniqe
+
+def get_random_code():
+    code = str(uuid.uuid4())[:11].replace("-","")
+    return code
+```
+
+##  Customize the BlogConfig() in "apps.py" in "blog"app 👇
+
+```python
+from django.apps import AppConfig
+
+class BlogConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "blog"
+
+    def ready(self):
+        import blog.api.signals
+```
+
+## Go to "api/serializers.py" under "blog" app 👇
+
+```python
+from rest_framework import serializers
+from blog.models import BlogPost, Category, Comment, Like, Post_view
+from users.api.serializers import UserSerializer
+from django.contrib.auth import get_user_model
+# User = settings.AUTH_USER_MODEL
+User = get_user_model()
+
+# class AllUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model  = User
+#         fields = (
+#             "username",
+#             "first_name",
+#             "last_name",
+#             "profile_pic",
+#             "biography"
+#         )
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = (
+            'id',
+            'name'
+        )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    # user = serializers.StringRelatedField(read_only=True)
+    # user_id = serializers.IntegerField()
+    # post = serializers.StringRelatedField()
+    # post_id = serializers.IntegerField()
+
+    # class Meta:
+    #     model = Comment
+    #     fields = "__all__"
+
+# kimin yorum yaptığını belirtmek için ilave edildi
+    user = serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model = Comment
+        fields = (
+            "id",
+            "content",
+            "time_stamp",
+            "user",
+        )
+
+class LikeSerializer(serializers.ModelSerializer):
+    # like_user = AllUserSerializer(many=True, read_only=True)
+    user = serializers.StringRelatedField()
+    user_id = serializers.IntegerField()
+
+    class Meta:
+        model = Like
+        fields = (
+            "id",
+            "user",
+            "user_id",
+            "post",
+            # "like_user"
+        )
+
+
+class BlogPostSerializer(serializers.ModelSerializer):
+    comment_post = CommentSerializer(many=True, read_only=True)
+    like_post = LikeSerializer(many=True, read_only=True)
+    category = serializers.StringRelatedField(read_only=True)
+    category_id = serializers.IntegerField()
+    author = serializers.StringRelatedField(read_only=True)
+    author_id = serializers.IntegerField(read_only=True)
+    like_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    post_view_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BlogPost
+        fields = (
+            "id",
+            "title",
+            "author",
+            "author_id",
+            "category_id",
+            "category",
+            "content",
+            "image",
+            "published_date",
+            "last_updated_date",
+            "status",
+            "slug",
+            "like_count",
+            "comment_count",
+            "post_view_count",
+            "comment_post",
+            "like_post",
+        )
+        read_only_fields = (
+            "published_date",
+            "updated_date",
+            "slug",
+        )
+
+    def get_like_count(self, obj):
+        return Like.objects.filter(post=obj.id).count()
+
+    def get_comment_count(self, obj):
+        return Comment.objects.filter(post=obj.id).count()
+
+    def get_post_view_count(self, obj):
+        return Post_view.objects.filter(post=obj.id).count()
+
+```
+
+## Go to "api/views.py" under blog app 👇
+
+```python
+from rest_framework import permissions
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
+from rest_framework import  generics, status
+from blog.api.pagination import CustomLimitOffsetPagination
+from blog.api.permissions import IsAdminUserOrReadOnly, IsPostOwnerOrReadOnly
+from blog.api.serializers import BlogPostSerializer, CategorySerializer, CommentSerializer,LikeSerializer
+from rest_framework.response import Response
+from blog.models import BlogPost, Category, Post_view, Comment, Like
+
+
+class CategoryView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+
+
+class BlogPostView(generics.ListCreateAPIView):
+    queryset = BlogPost.objects.all()
+    serializer_class = BlogPostSerializer
+    pagination_class = CustomLimitOffsetPagination
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+class BlogPostDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BlogPost.objects.all()
+    serializer_class = BlogPostSerializer
+    lookup_field = "slug"
+    permission_classes = [IsPostOwnerOrReadOnly]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        # Post_view.objects.get_or_create(user=request.user, post=instance)
+        Post_view.objects.create(user=request.user, post=instance)
+        return Response(serializer.data)
+
+class CommentView(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        print(self.kwargs)
+        slug = self.kwargs.get('slug')
+        blog = get_object_or_404(BlogPost, slug=slug)
+        user = self.request.user
+        comments = Comment.objects.filter(post=blog, user=user)
+        if comments.exists():
+            raise ValidationError(
+                "You can not add another comment, for this Post !")
+        serializer.save(post=blog, user=user)
+
+
+class LikeView(generics.ListCreateAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+
+    def create(self, request, *args, **kwargs):
+        user = request.data.get('user_id')
+        post = request.data.get('post')
+        serializer = self.get_serializer(data=request.data)
+        exists_like = Like.objects.filter(user_id=user, post=post)
+        serializer.is_valid(raise_exception=True)
+        if exists_like:
+            exists_like.delete()
+        else:
+            self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+```
+
+## Create "permissions.py" file under "api" folder in the "blog" app and add 👇
+
+```python
+from rest_framework import permissions
+
+class IsPostOwnerOrReadOnly(permissions.BasePermission):
+    #! If the request.user is the same as the author, it can update/delete. Otherwise can view 👇
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return request.user == obj.author
+
+class IsAdminUserOrReadOnly(permissions.IsAdminUser):
+    #! "Admin" can do any action. If not it can only view 👇
+    def has_permission(self, request, view):
+        is_admin = super().has_permission(request, view)
+        return request.method in permissions.SAFE_METHODS or is_admin
+```
+
+## Create "pagination.py" file under "api" folder in the "blog" app and add 👇
+
+```python
+from rest_framework.pagination import LimitOffsetPagination
+
+#! For 6 posts to appear on each page 👇
+class CustomLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 6
+```
+
+##  Go to "blog/api/urls.py" and add the path 👇
+
+```python
+from .views import (
+    CategoryView,
+    BlogPostView,
+    BlogPostDetailView,
+    CommentView,
+    LikeView
+)
+from django.urls import path
+from rest_framework import routers
+
+urlpatterns = [
+    path("category/", CategoryView.as_view()),
+    path("posts/", BlogPostView.as_view()),
+    path("like/", LikeView.as_view()),
+    path("posts/<str:slug>/", BlogPostDetailView.as_view()),
+    path("posts/<str:slug>/add_comment/", CommentView.as_view()),
+]
+```
+
+##  Do not forget to check the endpoints you wrote in [Postman](https://www.postman.com/).
+
+## <center> END OF THE  BACKEND 🥳</center>
+
+<hr>
+
+# <center> FOR DJANGO DEPLOYMENT YOU CAN USE "PYTHON ANY WHERE"</center>
+
+## 💻 Commands for setup 👇
+
+```bash
+    git clone https://github.com/githubUserName/projectName.git
+    cd projectName
+    python -m venv env
+    source env/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    echo SECRET_KEY=write_random_chars_to_here > .env
+    python manage.py migrate
+    $ python manage.py createsuperuser # optional
+```
+
+## Command for learn to current path 👇
+
+```bash
+    pwd
+```
+
+- "Add New Web App" with ManualConfigration with Python_LastVersion
+
+- Set "Source Code" with "Main Path" (example: /home/anyWhereUserName/ProjectName)
+
+- Set "Working Directory" with "Main Path" (example: /home/anyWhereUserName/ProjectName)
+
+- Set "VirtualEnv" with "Env Path" (example: /home/anyWhereUserName/ProjectName/env)
+
+## pythonanywhere/Web -> WSGI Configuration File(pythonanywhere_com_wsgi.py) 👇
+
+```python
+    import os
+    import sys
+
+    # Set: Project Main Path:
+    path = '/home/anyWhereUserName/ProjectName'
+
+    if path not in sys.path:
+        sys.path.append(path)
+
+    # Set: Where is settings.py:
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'projectFolderName.settings'
+
+    from django.core.wsgi import get_wsgi_application
+    application = get_wsgi_application()
+```
+
+##  Finished 
+
+## ‼ Don't forget 👉 click to 'Reload' button before publish.
+
+    if error, checking:
+
+        settting.py:
+
+            ALLOWED_HOSTS = ['*']
+
+            # folder -> static-files-path:
+            STATIC_URL = 'static/'
+            # root -> static-files-path:
+            STATIC_ROOT = BASE_DIR / STATIC_URL
+            # Alternates:
+            # if in base folder -> STATIC_ROOT = BASE_DIR / 'static/'
+            # if in app folder -> STATIC_ROOT = BASE_DIR / 'appFolderName/static/'
+
+        urls.py:
+
+            from django.conf import settings
+            from django.conf.urls.static import static
+            # url -> static-files-path:
+            urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+<hr>
+
+# <center> FOR REACT CONFIGURATION <center>
+
+## 💻 Install "cors-headers" for connecting with Frontend 👇
+
+# <center>✔ DJANGO-CORS-HEADERS ✔</center>
+
+<hr>
+
+🔑 A Django App that adds [Cross-Origin Resource Sharing (CORS)](https://github.com/adamchainz/django-cors-headers) headers to responses.
+
+🔑 This allows in-browser requests to your Django application from other origins.
+
+🔑 Adding CORS headers allows your resources to be accessed on other domains.
+
+🔑 It's important you understand the implications before adding the headers, since you could be unintentionally opening up your site's private data to others.
+
+## 💻 To install cors-headers 👇
+
+```bash
+pip install django-cors-headers
+```
+
+## ✔ Add 'corsheaders' to "INSTALLED_APPS" in "settings.py" file.
+
+## You will also need to add a middleware class to listen in on responses 👇
+
+```python
+MIDDLEWARE = [
+    ...,
+    "corsheaders.middleware.CorsMiddleware",
+    ...,
+]
+```
+
+## To allow all origins; add 👇
+
+```python
+CORS_ALLOW_ALL_ORIGINS=True
+```
+
+## Add a list of HTTP verbs that are allowed for the actual request 👇
+
+```python
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+```
+
+## Runserver 👇
+
+```bash
+python manage.py runserver
+```
+
+## Open the React Project and start it 👇
