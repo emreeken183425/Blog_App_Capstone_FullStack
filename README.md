@@ -1,4 +1,7 @@
+
+<!-- Frontend && Backend  capstone blog app project  -->
 ### CharField 255 karaktere kadar stringler için kullanılan alan tipidir. max_length argümanı tanımlanması zorunludur. max_length argümanı alanın alabileceği maksimum karakter sayısını belirler. Ürünümüz için isim alanı ekleylim. En fazla 200 karakter alabilsin.
+
 <hr>
  <div style="color: red;">1. verbose_name :</div> alanın admin sayfasıi form gibi çıktılarda görüntülecek adıdır. Eğer girilmezse değişken kullanılır.
 <hr>
@@ -659,6 +662,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 ```
 
 ## Go to user/api/views.py and add "UpdateUserView" 👇
+
 
 ```python
 class UpdateUserView(generics.RetrieveUpdateAPIView):
